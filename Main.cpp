@@ -22,7 +22,7 @@ int main()
 	//BT.BuildBTree(arr);
 	for (int i = M - 1; i < N; ++i)
 	{
-		BT.RecursiveBuild(arr[i], BT.Root);
+		BT.Insert(arr[i]);
 	}
 	BT.GetElementsInRangeN2N(BT.Root);
 }

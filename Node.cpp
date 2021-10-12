@@ -7,6 +7,7 @@ Node::Node()
 	Nodes = new Node*[1];
 	Leaf = true;
 	CurrentKeys = 0;
+	CurrentChildren = 0;
 }
 
 void Node::InitNode(int M)
@@ -20,15 +21,19 @@ void Node::InitNode(int M)
 	Nodes = new Node * [M + 1];
 	Leaf = true;
 	CurrentKeys = 0;
+	CurrentChildren = 0;
 }
 
-int Node::SplitNode(Node* NodeToSplit)
+int Node::SplitNode(int index, Node* NodeToSplit)
 {
 	Node left = Node();
 	Node right = Node();
+	left.InitNode(M);
+	right.InitNode(M);
 	left.Leaf = NodeToSplit->Leaf;
 	right.Leaf = NodeToSplit->Leaf;
-	this->Leaf = false;
+	Leaf = false;
+	NodeToSplit->Leaf = false;
 	int HalfSize = M/2;
 	int median = NodeToSplit->Keys[HalfSize];
 	for (int i = 0; i < HalfSize; ++i)
@@ -52,13 +57,17 @@ int Node::SplitNode(Node* NodeToSplit)
 	{
 		left.Nodes[i] = NodeToSplit->Nodes[i];
 		right.Nodes[i] = NodeToSplit->Nodes[i + HalfSize + 1];
-		NodeToSplit->Nodes[i] = nullptr;
-		NodeToSplit->Nodes[i + HalfSize + 1] = nullptr;
+		//NodeToSplit->Nodes[i] = nullptr;
+		//NodeToSplit->Nodes[i + HalfSize + 1] = nullptr;
 		NodeToSplit->Keys[i] = -1;
 		NodeToSplit->Keys[i + HalfSize] = -1;
 	}
-	NodeToSplit->Nodes[0] = &left;
-	NodeToSplit->Nodes[1] = &right;
+	Nodes[index] = &left;
+	Nodes[index + 1] = &right;
+	left.CurrentChildren = NodeToSplit->CurrentChildren/2;
+	right.CurrentChildren = NodeToSplit->CurrentChildren / 2;
+	CurrentKeys += 1;
+	CurrentChildren += 2;
 	InsertInOrder(median);
 	return median;
 }

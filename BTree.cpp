@@ -26,103 +26,59 @@ int* BTree::GenerateSequence(int N)
 	return arr;
 }
 
-void BTree::BuildBTree(int sequence[])
+void BTree::Insert(int i)
 {
 	int M = Root->M;
-	for (int i = 0; i < M - 1; ++i)
+	if (Root->CurrentKeys == M)
 	{
-		Root->Keys[i] = sequence[i];
+		Node s = Node();
+		s.InitNode(M);
+		s.Nodes[0] = Root;
+		s.SplitNode(0, Root);
+		Root = &s;
 	}
-	for (int i = M - 1; i < N; ++i)
+	Node* Next = Root;
+	if (Next->Leaf)
 	{
-		Node* NodeToInsert = Root;
-		if (Root->CurrentKeys == M)
+		Next->InsertInOrder(i);
+	}
+	else
+	{
+		for (int j = 0; j < M; ++j)
 		{
-			Node NewRoot = Node();
-			int k = NodeToInsert->SplitNode(Root);
-			NewRoot.Leaf = false;
-			NewRoot.CurrentKeys = 1;
-			NewRoot.Keys[0] = k;
-			NewRoot.Nodes[0] = Root->Nodes[0];
-			NewRoot.Nodes[1] = Root->Nodes[1];
-			Root = &NewRoot;
-		}
-		Node* NextNode = new Node();
-		NextNode->InitNode(M);
-		while (!NodeToInsert->Leaf)
-		{
-			//find appropriate leaf
-			for (int j = 0; j < M; ++j)
+			if (i <= Next->Keys[j] || Next->Keys[j] < 0)
 			{
-				int Check = NodeToInsert->Keys[j];
-				Node* Child = NodeToInsert->Nodes[j];
-				if (sequence[i] <= Check)
+				if (Next->Nodes[j]->CurrentKeys == M)
 				{
-					NextNode = NodeToInsert->Nodes[j];
-					break;
+					Next->SplitNode(j, Next->Nodes[j]);
 				}
-				if (NodeToInsert->Nodes[j]->CurrentKeys == M)
-				{
-					
-				}
-			}
-			if (NextNode->Leaf && NextNode->CurrentKeys == M)
-			{
-				int k = NodeToInsert->SplitNode(NextNode);
-			}
-			//if leaf is full, split leaf
-			//otherwise store leaf
-			else
-			{
-				NodeToInsert = NextNode;
+				Next = Next->Nodes[j];
+				break;
 			}
 		}
-		//insert sequence[i] into leaf
-		NextNode->InsertInOrder(sequence[i]);
+		Next->InsertInOrder(i);
 	}
 }
 
 void BTree::GetElementsInRangeN2N(Node* n)
 {
 	int M = Root->M;
-	if (n->Leaf)
+	int C = n->CurrentChildren;
+	if (n == nullptr)
 	{
 		return;
 	}
-	for (int i = 0; i < M; ++i)
+	for (int i = 0; i < C - 1; ++i)
 	{
-		int j = n->Keys[i];
+		int j = n->Keys[i]; //access violation
 		if (j >= N && j <= (2*N))
 		{
 			std::cout << n->Keys[i] << std::endl;
 			GetElementsInRangeN2N(n->Nodes[i]);
 		}
-	}
-}
-
-void BTree::RecursiveBuild(int i, Node* n)
-{
-	int M = Root->M;
-	if (n == Root && n->CurrentKeys == M)
-	{
-		int i = Root->SplitNode(Root);
-		return;
-	}
-	if (n->Leaf)
-	{
-		n->InsertInOrder(i);
-	}
-	else
-	{
-		Node next = Node();
-		for (int j = 0; j < M; ++j)
+		else
 		{
-			if (i <= n->Keys[j])
-			{
-				next = *n->Nodes[j];
-				break;
-			}
+			GetElementsInRangeN2N(n->Nodes[i]);
 		}
-		RecursiveBuild(i, &next);
 	}
 }

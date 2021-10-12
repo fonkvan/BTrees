@@ -9,8 +9,7 @@ public:
 
 	BTree(int M);
 	int* GenerateSequence(int N);
-	void BuildBTree(int sequence[]);
-	void RecursiveBuild(int i, Node* n);
+	void Insert(int i);
 	void GetElementsInRangeN2N(Node* n);
 };
 
